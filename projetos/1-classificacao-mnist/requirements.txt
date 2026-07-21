@@ -1,2 +1,5 @@
-tensorflow>=2.12
-numpy
+tensorflow==2.15.1
+numpy==1.26.4
+h5py==3.10.0
+pillow
+opencv-python==4.10.0.84
