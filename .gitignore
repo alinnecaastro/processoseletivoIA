@@ -7,8 +7,6 @@ yolo11n.onnx
 # Python
 __pycache__/
 *.pyc
-model.h5
-model.tflite
 .venv/
 
 # Ambientes / editores
