@@ -1,4 +1,4 @@
-tensorflow==2.21.1
+tensorflow==2.21.0
 numpy==1.26.4
 h5py==3.10.0
 pillow
