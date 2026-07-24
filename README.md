@@ -1,191 +1,98 @@
-# Processo Seletivo – Intensivo Maker | AI
+# Classificação de Dígitos Manuscritos (MNIST)
 
-Bem-vindo(a) à **etapa prática do processo seletivo para o Intensivo Maker**.
+Projeto desenvolvido como parte do desafio técnico de Edge AI. O objetivo é treinar uma Rede Neural Convolucional (CNN) para reconhecer dígitos manuscritos do conjunto de dados MNIST e otimizar o modelo para execução em dispositivos com recursos limitados utilizando TensorFlow Lite.
 
-Esta atividade tem como objetivo avaliar competências técnicas relacionadas a **Machine Learning**, **Visão Computacional** e **Otimização de modelos para sistemas embarcados (Edge AI)**, a partir da aplicação prática dos conhecimentos adquiridos nos cursos EAD da etapa anterior.
+1️⃣ Resumo da Arquitetura do Modelo
 
-> 🎯 **Importante**
-> O foco deste desafio é avaliar sua capacidade de **projetar, treinar e otimizar um modelo de IA** — e de **entregar corretamente** os artefatos gerados.
+O modelo desenvolvido em train_model.py utiliza uma Rede Neural Convolucional (CNN) composta por três blocos convolucionais. Cada bloco possui uma camada Conv2D com filtros de tamanho 3x3, função de ativação ReLU e preenchimento same, seguida por uma camada de BatchNormalization e uma camada de MaxPooling2D com janela 2x2.
 
----
+Os blocos convolucionais utilizam, respectivamente, 32, 64 e 128 filtros. O aumento gradual da quantidade de filtros permite que o modelo aprenda desde características mais simples, como bordas e traços, até padrões mais complexos presentes nos dígitos manuscritos.
 
-## 📌 Navegação Rápida
+Após os blocos convolucionais, os dados são transformados em um vetor por meio da camada Flatten. Em seguida, é utilizada uma camada totalmente conectada Dense com 128 neurônios e ativação ReLU.
 
-- 🏁 [Passo 0 – Antes de Tudo](#-passo-0-antes-de-tudo)
-- ⚙ [Passo 1 – Preparando o Ambiente](#-passo-1-preparando-o-ambiente)
-- 🧭 [Passo 2 – Escolha do Projeto](#-passo-2-escolha-do-projeto)
-- 📤 [Passo 3 – Instruções de Entrega](#-passo-3-instruções-de-entrega)
-- ⚠️ [Restrições Gerais de Engenharia](#️-restrições-gerais-de-engenharia)
-- 🆘 [Suporte](#-suporte)
+Antes da camada de saída, foi aplicada uma camada de Dropout com taxa de 0,5, que desativa aleatoriamente 50% dos neurônios durante o treinamento. Essa técnica ajuda a reduzir o sobreajuste e melhora a capacidade de generalização do modelo.
 
----
+A camada de saída possui 10 neurônios, correspondentes aos dígitos de 0 a 9, e utiliza a função de ativação softmax, responsável por gerar a probabilidade prevista para cada classe.
 
-## 🏁 Passo 0: Antes de Tudo
+O modelo foi compilado utilizando o otimizador Adam, a função de perda sparse_categorical_crossentropy e a métrica de acurácia.
 
-Caso você **nunca tenha utilizado Git ou GitHub**, não se preocupe. Siga atentamente as etapas abaixo.
+Para a validação, as 60.000 imagens originalmente destinadas ao treinamento no conjunto MNIST foram embaralhadas de forma reproduzível utilizando a semente 42. Em seguida, foram separadas em 54.000 imagens para treinamento e 6.000 imagens para validação. As 10.000 imagens oficiais de teste do MNIST foram mantidas separadas para a avaliação final.
 
-### 1️⃣ Criação de Conta no GitHub
+O treinamento foi configurado para executar por até 15 épocas, utilizando lotes de 128 imagens. Também foi aplicada a estratégia de parada antecipada, por meio do callback EarlyStopping, monitorando a perda de validação (val_loss). O treinamento é interrompido quando não ocorre melhoria durante três épocas consecutivas. A opção restore_best_weights=True restaura automaticamente os pesos correspondentes à melhor perda de validação encontrada durante o treinamento.
 
-1. Acesse: https://github.com
-2. Clique em **Sign up**
-3. Crie sua conta gratuita seguindo as instruções da plataforma
+## 2️⃣ Bibliotecas Utilizadas
 
-(*O GitHub será utilizado para envio, versionamento e correção automática do seu projeto.*)
+O desenvolvimento do projeto foi realizado em Python utilizando bibliotecas voltadas para aprendizado de máquina, processamento de imagens e computação numérica. As principais bibliotecas utilizadas foram:
 
-### 2️⃣ Instalação do Git
+| Biblioteca   | Versão                      | Finalidade                                                                                                  |
+| ------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| TensorFlow   | **2.21.0**                  | Construção, treinamento, avaliação e conversão do modelo para TensorFlow Lite.                              |
+| Keras        | **3.12.3**                  | Criação da arquitetura da Rede Neural Convolucional (CNN), definição das camadas e treinamento do modelo.   |
+| NumPy        | **1.26.4**                  | Manipulação de arrays, normalização dos dados e divisão do conjunto de treinamento e validação.             |
+| Pillow (PIL) | Conforme `requirements.txt` | Leitura e pré-processamento de imagens utilizadas na inferência.                                            |
+| OpenCV       | **4.10.0.84**               | Processamento de imagens, incluindo operações de preparação das imagens antes da classificação pelo modelo. |
 
-O **Git** é a ferramenta que permite versionar e enviar seu código para o GitHub.
+Além dessas bibliotecas, foram utilizados módulos nativos da linguagem Python, como `os`, para configuração do ambiente de execução e manipulação de arquivos.
 
-- **Windows** — Baixe e instale o **Git Bash**: https://git-scm.com/downloads
-- **Linux / macOS** — Verifique se o Git já está instalado:
-  ```bash
-  git --version
-  ```
+3️⃣ Técnica de Otimização do Modelo
 
----
+Após o treinamento da Rede Neural Convolucional (CNN), o modelo salvo no formato Keras (model.h5) foi convertido para o formato TensorFlow Lite (model.tflite) utilizando uma técnica de otimização conhecida como Quantização de Faixa Dinâmica (Dynamic Range Quantization).
 
-## ⚙ Passo 1: Preparando o Ambiente
+A conversão foi realizada por meio da classe TFLiteConverter, utilizando a configuração:
 
-Para desenvolver o desafio, você deverá criar uma cópia deste repositório.
+conversor.optimizations = [tf.lite.Optimize.DEFAULT]
 
-### 1️⃣ Fork do Repositório
+Essa técnica aplica uma otimização pós-treinamento (Post-Training Quantization), reduzindo a precisão dos pesos compatíveis do modelo de ponto flutuante para um formato mais compacto durante a inferência. Como não foi fornecido um representative_dataset, a conversão utiliza automaticamente a quantização de faixa dinâmica.
 
-No canto superior direito desta página, clique em **Fork**. Uma cópia deste repositório será criada no **seu perfil do GitHub**.
-(*O Fork permite que você trabalhe de forma independente sem alterar o repositório original.*)
+O principal objetivo dessa otimização é reduzir o tamanho do arquivo do modelo e melhorar sua eficiência em dispositivos com recursos limitados, como microcontroladores, smartphones e sistemas embarcados, mantendo uma boa precisão na classificação dos dígitos manuscritos.
 
-### 2️⃣ Clone do Repositório
+Ao final da conversão, o programa também calcula o tamanho dos arquivos model.h5 e model.tflite, apresentando a porcentagem de redução obtida após a otimização, permitindo comparar diretamente o ganho de armazenamento proporcionado pela técnica utilizada.
 
-No repositório do **seu Fork**, clique em **<> Code**, copie a URL e execute:
+4️⃣ Resultados Obtidos
 
-```bash
-git clone https://github.com/SEU_USUARIO/nome-do-repositorio.git
-cd nome-do-repositorio
+Ao final do treinamento, o modelo apresentou uma acurácia de validação de 98,92% e uma acurácia de teste de 98,93%, demonstrando excelente desempenho na classificação dos dígitos manuscritos do conjunto de dados MNIST.
+
+Após a conversão do modelo para o formato TensorFlow Lite utilizando quantização de faixa dinâmica, foi observada uma redução significativa no tamanho do arquivo, tornando o modelo mais adequado para aplicações de Edge AI.
+
+Resultados
+Métrica	Valor
+Perda de validação	0,0429
+Acurácia de validação	98,92%
+Acurácia de teste	98,93%
+Tamanho dos arquivos
+Arquivo	Tamanho
+model.h5	2,84 MB
+model.tflite	0,24 MB
+
+A conversão para TensorFlow Lite reduziu o tamanho do modelo em aproximadamente 91,39%, mantendo um elevado nível de precisão. Esse resultado demonstra que a técnica de otimização foi eficaz, tornando o modelo mais leve e apropriado para execução em dispositivos com recursos computacionais limitados, sem comprometer significativamente seu desempenho.
+
+## 6️⃣ Exemplo de Inferência
+
+### Saída do terminal
+
+```text
+============================================================
+INFERÊNCIA COM O MODELO TENSORFLOW LITE
+============================================================
+Amostra 01 | Predito: 7 | Real: 7 | Confiança: 100.00% | ACERTOU | Tempo: 0.149 ms
+Amostra 02 | Predito: 2 | Real: 2 | Confiança: 100.00% | ACERTOU | Tempo: 0.119 ms
+Amostra 03 | Predito: 1 | Real: 1 | Confiança: 100.00% | ACERTOU | Tempo: 0.099 ms
+Amostra 04 | Predito: 0 | Real: 0 | Confiança: 100.00% | ACERTOU | Tempo: 0.097 ms
+Amostra 05 | Predito: 4 | Real: 4 | Confiança: 100.00% | ACERTOU | Tempo: 0.094 ms
+Amostra 06 | Predito: 1 | Real: 1 | Confiança: 100.00% | ACERTOU | Tempo: 0.102 ms
+Amostra 07 | Predito: 4 | Real: 4 | Confiança: 99.98% | ACERTOU | Tempo: 0.096 ms
+Amostra 08 | Predito: 9 | Real: 9 | Confiança: 100.00% | ACERTOU | Tempo: 0.095 ms
+Amostra 09 | Predito: 5 | Real: 5 | Confiança: 100.00% | ACERTOU | Tempo: 0.094 ms
+Amostra 10 | Predito: 9 | Real: 9 | Confiança: 100.00% | ACERTOU | Tempo: 0.094 ms
+
+------------------------------------------------------------
+RESUMO
+------------------------------------------------------------
+Acertos: 10/10
+Acurácia nas amostras: 100.00%
+Tempo médio por inferência: 0.104 ms
 ```
 
-### 3️⃣ Preparação do Ambiente de Execução
+### Comentário
 
-Você pode executar o projeto de **três formas**. Escolha apenas uma.
-
-#### Opção A – Ambiente Python Local
-Requisitos: Python **3.10 ou 3.11** e pip.
-
-As dependências ficam dentro da pasta do projeto escolhido (veja Passo 2), então instale-as **depois** de escolher seu projeto:
-
-```bash
-cd projetos/<pasta-do-projeto-escolhido>
-pip install -r requirements.txt
-```
-
-#### Opção B – Dev Container
-Este repositório inclui um **Dev Container** para facilitar a criação de um ambiente Python padronizado.
-
-**Requisitos:** VS Code, Docker instalado, extensão **Dev Containers**.
-
-**Passos:** abra o repositório no VS Code → **"Reopen in Container"** → aguarde a criação automática do ambiente.
-
-#### Opção C – via browser (GitHub Codespaces)
-1. Clique em **<> Code**
-2. Clique em **Codespaces**
-3. Clique em **Create codespace on main**
-
-> Será aberta uma instância do VS Code no seu navegador com o container configurado.
-
----
-
-## 🧭 Passo 2: Escolha do Projeto
-
-Este desafio oferece **três opções de projeto**, todas em Visão Computacional e com **níveis de dificuldade equivalentes**. Você deve escolher **apenas uma**.
-
-| # | Projeto | Tarefa | Dataset |
-|---|---------|--------|---------|
-| 1 | [Classificação MNIST](projetos/1-classificacao-mnist/README.md) | Classificação de dígitos manuscritos (0-9) | `tf.keras.datasets.mnist` |
-| 2 | [Classificação CIFAR-10](projetos/2-classificacao-cifar/README.md) | Classificação de imagens coloridas (10 categorias de objetos/animais) | `tf.keras.datasets.cifar10` |
-| 3 | [Detecção de Máscaras Faciais](projetos/3-deteccao-mascaras/README.md) | Detecção de objetos: localizar rostos e classificar uso de máscara (fine-tuning de YOLO) | Face Mask Detection (Kaggle, CC0) — já incluso no repositório |
-
-Clique no link do projeto escolhido para ver as instruções técnicas completas e o template do relatório.
-
-### ⚠️ Depois de escolher, você DEVE:
-
-1. Trabalhar **apenas** dentro da pasta do projeto escolhido (`projetos/N-nome-do-projeto/`).
-2. **Apagar as pastas dos outros dois projetos** dentro de `projetos/` antes do commit final.
-3. Manter os nomes de arquivos e a estrutura interna da pasta do projeto **sem alterações**.
-
-> 🤖 **Por quê apagar as outras pastas?**
-> A correção automática (GitHub Actions) identifica qual projeto você escolheu verificando qual pasta restou dentro de `projetos/`. Se mais de uma pasta permanecer (ou nenhuma), a validação falha automaticamente com uma mensagem explicando o problema.
-
----
-
-## 📤 Passo 3: Instruções de Entrega
-
-### ✔️ Antes de enviar
-
-Dentro da pasta do seu projeto, execute os scripts e confirme que os arquivos foram gerados:
-
-```bash
-cd projetos/<pasta-do-projeto-escolhido>
-python train_model.py       # deve gerar model.h5 (Projetos 1 e 2) ou model.pt (Projeto 3)
-python optimize_model.py    # deve gerar model.tflite
-```
-
-> ⚠️ **Importante:** a correção automática **não treina nada por você**. Ela valida os artefatos que **você gerou localmente e enviou (commitou) para o repositório**. Se esses arquivos não estiverem no seu commit, a validação falha.
-
-### ⬆️ Envio do Código
-
-```bash
-git add .
-git commit -m "Entrega do desafio técnico - Seu Nome"
-git push origin main
-```
-
-### 🔍 Verificação Automática
-
-1. Acesse a aba **Actions** no GitHub do seu Fork
-2. Verifique se o workflow foi executado com sucesso (✅)
-3. Em caso de erro (❌), consulte os logs, corrija e envie novamente
-
-### 📎 Submissão Final
-
-Copie o link do seu repositório e envie conforme orientações do processo seletivo no Moodle.
-
----
-
-## ⚠️ Restrições Gerais de Engenharia
-
-Válidas para os três projetos (detalhes específicos estão no README de cada um):
-
-- Treinamento apenas em **CPU**
-- Sem uso de modelos pré-treinados — **exceto no Projeto 3**, onde o fine-tuning
-  de um modelo pré-treinado (YOLO11n) é intencional e faz parte do desafio
-- Número de épocas limitado (compatível com execução rápida — exceto o Projeto 3,
-  que naturalmente leva mais tempo por envolver fine-tuning de um detector)
-- Código deve executar do início ao fim **sem intervenção manual**
-- Os artefatos do modelo treinado e do modelo otimizado (`model.h5`/`model.pt` e
-  `model.tflite`, dependendo do projeto) **devem ser gerados localmente e
-  enviados (commitados) junto com o código** — a correção automática apenas os
-  valida, não os gera
-
-> **Importante:** o objetivo não é obter a maior acurácia possível, mas sim demonstrar **engenharia eficiente** e a capacidade de entregar um pipeline completo e reprodutível.
-
----
-
-## 📚 Material de Apoio
-
-Os cursos realizados na etapa anterior **devem ser utilizados como referência**:
-
-- 📘 Fundamentos de Inteligência Artificial para Sistemas Embarcados
-- 👁️ Sistemas de Visão Computacional Embarcada
-- ⚙️ Otimização de Modelos em Sistemas Embarcados
-
----
-
-## 🆘 Suporte
-
-Em caso de dúvidas:
-
-- Consulte o material dos cursos EAD
-- Leia atentamente este README e o README do projeto escolhido
-- Analise os logs das GitHub Actions
-- Utilize os canais oficiais para contato com os instrutores
-
-Boa sorte no processo seletivo.
-****
+Nas dez amostras testadas, o modelo classificou corretamente todos os dígitos, alcançando **100% de acerto** durante a inferência. Esse resultado está de acordo com a alta acurácia obtida nas etapas de validação e teste do modelo. Além da precisão, chamou minha atenção o tempo de execução, com uma média de apenas **0,104 ms por inferência**, mostrando que o modelo ficou bastante leve e rápido após a conversão para TensorFlow Lite. Embora esse conjunto de amostras seja pequeno e não represente todo o conjunto de dados, os resultados indicam que o modelo apresentou um desempenho consistente e adequado para aplicações de Edge AI.
