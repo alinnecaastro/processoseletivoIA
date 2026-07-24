@@ -1,4 +1,5 @@
 tensorflow==2.21.0
-numpy
-opencv-python
+keras==3.12.3
+numpy==1.26.4
 Pillow
+opencv-python==4.10.0.84
