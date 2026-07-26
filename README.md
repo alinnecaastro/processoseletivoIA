@@ -1,3 +1,10 @@
+Identificação do Candidato
+
+Nome completo: Alinne de Souza Santos Castro
+
+GitHub: alinnecaastro  
+
+Link : https://github.com/alinnecaastro/processoseletivoIA.git
 # Classificação de Dígitos Manuscritos (MNIST)
 
 Projeto desenvolvido como parte do desafio técnico de Edge AI. O objetivo é treinar uma Rede Neural Convolucional (CNN) para reconhecer dígitos manuscritos do conjunto de dados MNIST e otimizar o modelo para execução em dispositivos com recursos limitados utilizando TensorFlow Lite.
