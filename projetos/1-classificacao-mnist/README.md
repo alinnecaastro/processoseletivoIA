@@ -1,3 +1,11 @@
+Identificação do Candidato
+
+Nome completo: Alinne de Souza Santos Castro
+
+GitHub: alinnecaastro  
+
+Link : https://github.com/alinnecaastro/processoseletivoIA.git
+
 # Classificação de Dígitos Manuscritos (MNIST)
 
 Projeto desenvolvido como parte do desafio técnico de Edge AI. O objetivo é treinar uma Rede Neural Convolucional (CNN) para reconhecer dígitos manuscritos do conjunto de dados MNIST e otimizar o modelo para execução em dispositivos com recursos limitados utilizando TensorFlow Lite.
@@ -65,6 +73,22 @@ model.h5	2,84 MB
 model.tflite	0,24 MB
 
 A conversão para TensorFlow Lite reduziu o tamanho do modelo em aproximadamente 91,39%, mantendo um elevado nível de precisão. Esse resultado demonstra que a técnica de otimização foi eficaz, tornando o modelo mais leve e apropriado para execução em dispositivos com recursos computacionais limitados, sem comprometer significativamente seu desempenho.
+
+## 5️⃣ Dificuldades, Decisões e Limitações
+
+Durante o desenvolvimento, uma das dificuldades encontradas foi garantir a
+compatibilidade entre as versões do TensorFlow, Keras e NumPy. Para evitar
+erros de dependência e permitir a reprodução do projeto, foram definidas
+versões específicas no arquivo requirements.txt.
+
+Outra decisão importante foi utilizar lotes de 128 imagens. Esse tamanho
+oferece um equilíbrio entre velocidade de treinamento e consumo de memória,
+especialmente considerando a execução somente em CPU.
+
+Também foi utilizada uma taxa de Dropout de 0,5 para reduzir o risco de
+sobreajuste. Como limitação, o desempenho apresentado na seção de inferência
+foi calculado utilizando apenas 10 amostras e, portanto, não representa
+isoladamente todo o conjunto de teste.
 
 ## 6️⃣ Exemplo de Inferência
 
