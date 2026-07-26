@@ -118,13 +118,13 @@ Tempo médio por inferência: 0.104 ms
 
 Nas dez amostras testadas, o modelo classificou corretamente todos os dígitos, alcançando **100% de acerto** durante a inferência. Esse resultado está de acordo com a alta acurácia obtida nas etapas de validação e teste do modelo. Além da precisão, chamou minha atenção o tempo de execução, com uma média de apenas **0,104 ms por inferência**, mostrando que o modelo ficou bastante leve e rápido após a conversão para TensorFlow Lite. Embora esse conjunto de amostras seja pequeno e não represente todo o conjunto de dados, os resultados indicam que o modelo apresentou um desempenho consistente e adequado para aplicações de Edge AI.
 
-## 7️⃣ Como Executar o Projeto
+## Como Executar o Projeto
 
 Este repositório inclui um Dev Container para facilitar a criação de um ambiente Python padronizado.
 
 O projeto pode ser executado pelo **Dev Container**, que prepara automaticamente o ambiente necessário, ou diretamente pelo terminal caso as dependências já estejam instaladas.
 
-### Opção 1 — Executar pelo Dev Container
+### Executar pelo Dev Container
 
 #### Pré-requisitos
 
